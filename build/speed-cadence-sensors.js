@@ -4,15 +4,15 @@
  * Spec sheet: https://www.thisisant.com/resources/bicycle-speed-and-cadence/
  */
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+        var extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var Ant = require("./ant");
 var Messages = Ant.Messages;
@@ -213,21 +213,25 @@ function updateSpeedState(sensor, state, data) {
     var speedRevolutionCount = data.readUInt16LE(Messages.BUFFER_INDEX_MSG_DATA + 6);
     speedEventTime |= data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 5) << 8;
     speedRevolutionCount|=data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 7) << 8;
-    if (speedEventTime !== oldSpeedTime) {
-        state.SpeedEventTime = speedEventTime;
-        state.CumulativeSpeedRevolutionCount = speedRevolutionCount;
-        if (oldSpeedTime > speedEventTime) {
-            speedEventTime += (1024 * 64);
-        }
-        var distance = sensor.wheelCircumference * (speedRevolutionCount - oldSpeedCount);
-        state.CalculatedDistance = distance;
-        //speed in m/sec
-        var speed = (distance * 1024) / (speedEventTime - oldSpeedTime);
-        if (!isNaN(speed)) {
-            state.CalculatedSpeed = speed;
-            sensor.emit('speedData', state);
-        }
+    //if (speedEventTime !== oldSpeedTime) {
+    state.SpeedEventTime = speedEventTime;
+    state.CumulativeSpeedRevolutionCount = speedRevolutionCount;
+    if (oldSpeedTime > speedEventTime) {
+        speedEventTime += (1024 * 64);
     }
+    var distance = sensor.wheelCircumference * (speedRevolutionCount - oldSpeedCount);
+    state.CalculatedDistance = distance;
+    //speed in m/sec
+    var speed = (distance * 1024) / (speedEventTime - oldSpeedTime);
+    if (!isNaN(speed)) {
+        state.CalculatedSpeed = speed;
+        sensor.emit('speedData', state);
+    }
+    else{
+        state.CalculatedSpeed = 0;
+        sensor.emit('speedData', state);
+    }
+    //}
 }
 function updateState(sensor, state, data) {
     //get old state for calculating cumulative values
@@ -287,6 +291,10 @@ function updateCadenceState(sensor, state, data) {
         let cadence = 60 * diffCount / (diffTime / 1024);
         if (!isNaN(cadence)) {
             state.CalculatedCadence = cadence;
+            sensor.emit('cadenceData', state);
+        }
+        else{
+            state.CalculatedCadence = 0;
             sensor.emit('cadenceData', state);
         }
     }
