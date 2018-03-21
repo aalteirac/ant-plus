@@ -1,6 +1,6 @@
 # ant-plus
 
-A node.js module for ANT+
+A node.js module for ANT+, forked to include Garmin Cadence and Speed Sensor
 
 ## Prerequisites
 
@@ -13,7 +13,7 @@ Use [Zadig](http://sourceforge.net/projects/libwdi/files/zadig/) to install the 
 ## Install
 
 ```sh
-npm install ant-plus
+npm install aai-ant-plus
 ```
 
 ## usage

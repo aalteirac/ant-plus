@@ -1,15 +1,16 @@
 {
-	"name": "ant-plus",
-	"version": "0.0.19",
+	"name": "aai-ant-plus",
+	"version": "0.1",
 	"description": "A node module for ANT+",
 	"main": "ant-plus.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"prepare": "tsc"
+		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"keywords": [
 		"ANT",
-		"ANT+"
+		"ANT+",
+	    "Garmin",
+	    "Sensor"
 	],
 	"author": {
 		"name": "Alessandro Vergani",
@@ -22,11 +23,6 @@
 	"dependencies": {
 		"usb": "^1.3.1"
 	},
-	"devDependencies": {
-		"typescript": "^2.6.2",
-		"@types/node": "^6.0.0",
-		"@types/usb": "^1.1.4"
-	},
 	"files": [
 		"ant-plus.js",
 		"src/",
@@ -38,7 +34,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/loghorn/ant-plus.git"
+		"url": "https://github.com/aalteirac/ant-plus/ant-plus.git"
 	},
-	"bugs": "https://github.com/Loghorn/ant-plus/issues"
+	"bugs": "https://github.com/aalteirac/ant-plus/ant-plus.git"
 }
