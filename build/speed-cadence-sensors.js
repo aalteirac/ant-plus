@@ -42,7 +42,7 @@ var SpeedCadenceSensor = /** @class */ (function (_super) {
         this.wheelCircumference = wheelCircumference;
     };
     SpeedCadenceSensor.prototype.attach = function (channel, deviceID) {
-        console.log("ATTACH SENSOR",channel, 'receive', deviceID, SpeedCadenceSensor.deviceType, 0, 255, 8086);
+        //console.log("ATTACH SENSOR",channel, 'receive', deviceID, SpeedCadenceSensor.deviceType, 0, 255, 8086);
         _super.prototype.attach.call(this, channel, 'receive', deviceID, SpeedCadenceSensor.deviceType, 0, 255, 8086);
         this.state = new SpeedCadenceSensorState(deviceID);
     };
@@ -130,7 +130,7 @@ var CadenceSensor = /** @class */ (function (_super) {
         return _this;
     }
     CadenceSensor.prototype.attach = function (channel, deviceID) {
-        console.log("ATTACH SENSOR",channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8086);
+        //console.log("ATTACH SENSOR",channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8086);
         _super.prototype.attach.call(this, channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8086);
         this.state = new SpeedCadenceSensorState(deviceID);
     };
@@ -173,7 +173,7 @@ var SpeedSensor = /** @class */ (function (_super) {
         this.wheelCircumference = wheelCircumference;
     };
     SpeedSensor.prototype.attach = function (channel, deviceID) {
-        console.log("ATTACH SENSOR",channel, 'receive', deviceID, SpeedSensor.deviceType, 0, 255, 8086);
+        //console.log("ATTACH SENSOR",channel, 'receive', deviceID, SpeedSensor.deviceType, 0, 255, 8086);
         _super.prototype.attach.call(this, channel, 'receive', deviceID, SpeedSensor.deviceType, 0, 255, 8086);
         this.state = new SpeedCadenceSensorState(deviceID);
     };
