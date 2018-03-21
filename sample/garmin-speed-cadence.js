@@ -1,4 +1,4 @@
-const Ant = require('ant-plus');
+const Ant = require('aai-ant-plus');
 const stick = new Ant.GarminStick3;
 const cadenceSensor = new Ant.CadenceSensor(stick);
 const speedSensor = new Ant.SpeedSensor(stick);

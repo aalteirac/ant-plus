@@ -1,6 +1,6 @@
 'use strict';
 
-const Ant = require('../ant-plus');
+const Ant = require('aai-ant-plus');
 const stick = new Ant.GarminStick2();
 
 const fitnessEquipmentSensor = new Ant.FitnessEquipmentSensor(stick);

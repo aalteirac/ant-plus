@@ -1,4 +1,4 @@
-var Ant = require('../ant-plus');
+const Ant = require('aai-ant-plus');
 
 function openStick(stick, stickid) {
 	var sensor1 = new Ant.HeartRateSensor(stick);
