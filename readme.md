@@ -19,7 +19,7 @@ npm install aai-ant-plus
 ## usage
 
 ```javascript
-var Ant = require('ant-plus');
+var Ant = require('aai-ant-plus');
 ```
 
 #### Create USB stick
