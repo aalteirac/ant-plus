@@ -1,6 +1,6 @@
 {
 	"name": "aai-ant-plus",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"description": "A node module for ANT+",
 	"main": "ant-plus.js",
 	"scripts": {
