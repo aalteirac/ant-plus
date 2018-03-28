@@ -1,8 +1,5 @@
 "use strict";
-/*
- * ANT+ profile: https://www.thisisant.com/developer/ant-plus/device-profiles/#523_tab
- * Spec sheet: https://www.thisisant.com/resources/bicycle-speed-and-cadence/
- */
+
 var __extends = (this && this.__extends) || (function () {
         var extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -130,8 +127,8 @@ var CadenceSensor = /** @class */ (function (_super) {
         return _this;
     }
     CadenceSensor.prototype.attach = function (channel, deviceID) {
-        //console.log("ATTACH SENSOR",channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8086);
-        _super.prototype.attach.call(this, channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8086);
+        //lower cycle to get about 1hz
+        _super.prototype.attach.call(this, channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8000);
         this.state = new SpeedCadenceSensorState(deviceID);
     };
     CadenceSensor.prototype.decodeData = function (data) {
@@ -174,7 +171,7 @@ var SpeedSensor = /** @class */ (function (_super) {
     };
     SpeedSensor.prototype.attach = function (channel, deviceID) {
         //console.log("ATTACH SENSOR",channel, 'receive', deviceID, SpeedSensor.deviceType, 0, 255, 8086);
-        _super.prototype.attach.call(this, channel, 'receive', deviceID, SpeedSensor.deviceType, 0, 255, 8086);
+        _super.prototype.attach.call(this, channel, 'receive', deviceID, SpeedSensor.deviceType, 0, 255, 8102);
         this.state = new SpeedCadenceSensorState(deviceID);
     };
     SpeedSensor.prototype.decodeData = function (data) {
@@ -223,6 +220,7 @@ function updateSpeedState(sensor, state, data) {
     state.CalculatedDistance = distance;
     //speed in m/sec
     var speed = (distance * 1024) / (speedEventTime - oldSpeedTime);
+    //console.log(speed);
     if (!isNaN(speed)) {
         state.CalculatedSpeed = speed;
         sensor.emit('speedData', state);
@@ -289,6 +287,7 @@ function updateCadenceState(sensor, state, data) {
         let diffCount = cadenceCount - oldCadenceCount;
         let diffTime = cadenceTime - oldCadenceTime;
         let cadence = 60 * diffCount / (diffTime / 1024);
+        //console.log("CADENCE",cadence);
         if (!isNaN(cadence)) {
             state.CalculatedCadence = cadence;
             sensor.emit('cadenceData', state);
