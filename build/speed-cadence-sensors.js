@@ -1,5 +1,8 @@
 "use strict";
-
+/*
+ * ANT+ profile: https://www.thisisant.com/developer/ant-plus/device-profiles/#523_tab
+ * Spec sheet: https://www.thisisant.com/resources/bicycle-speed-and-cadence/
+ */
 var __extends = (this && this.__extends) || (function () {
         var extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -127,7 +130,7 @@ var CadenceSensor = /** @class */ (function (_super) {
         return _this;
     }
     CadenceSensor.prototype.attach = function (channel, deviceID) {
-        //lower cycle to get about 1hz
+        //console.log("ATTACH SENSOR",channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8086);
         _super.prototype.attach.call(this, channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8000);
         this.state = new SpeedCadenceSensorState(deviceID);
     };
@@ -273,31 +276,29 @@ function updateState(sensor, state, data) {
     }
 }
 function updateCadenceState(sensor, state, data) {
-    //get old state for calculating cumulative values
-    var oldCadenceTime = state.CadenceEventTime;
-    var oldCadenceCount = state.CumulativeCadenceRevolutionCount;
-    var cadenceTime = data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 4);//data.readUInt16LE(Messages.BUFFER_INDEX_MSG_DATA);
-    var cadenceCount = data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 6);
+    let cadenceTime = data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 4);
     cadenceTime |= data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 5) << 8;
+
+    let cadenceCount = data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 6);
     cadenceCount |= data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 7) << 8;
-    if (oldCadenceCount != null) {
-        if (oldCadenceTime > cadenceTime) {
+
+    if (state.oldCadenceCount != null) {
+        if (state.oldCadenceCount > cadenceTime) {
             cadenceTime += (1024 * 64);
         }
-        let diffCount = cadenceCount - oldCadenceCount;
-        let diffTime = cadenceTime - oldCadenceTime;
-        let cadence = 60 * diffCount / (diffTime / 1024);
-        //console.log("CADENCE",cadence);
-        if (!isNaN(cadence)) {
-            state.CalculatedCadence = cadence;
-            sensor.emit('cadenceData', state);
+        let diffCount = cadenceCount - state.oldCadenceCount;
+        let diffTime = cadenceTime - state.oldCadenceTime;
+        let rpm = 60 * diffCount / (diffTime / 1024);
+
+        if (rpm) {
+            state.CalculatedCadence = rpm;
         }
         else{
             state.CalculatedCadence = 0;
-            sensor.emit('cadenceData', state);
         }
+        sensor.emit('cadenceData', state);
     }
-    state.CadenceEventTime = cadenceTime;
-    state.CumulativeCadenceRevolutionCount = cadenceCount;
+    state.oldCadenceCount = cadenceCount;
+    state.oldCadenceTime = cadenceTime;
 }
 //# sourceMappingURL=speed-cadence-sensors.js.map
