@@ -131,7 +131,7 @@ var CadenceSensor = /** @class */ (function (_super) {
     }
     CadenceSensor.prototype.attach = function (channel, deviceID) {
         //console.log("ATTACH SENSOR",channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8086);
-        _super.prototype.attach.call(this, channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8000);
+        _super.prototype.attach.call(this, channel, 'receive', deviceID, CadenceSensor.deviceType, 0, 255, 8102);
         this.state = new SpeedCadenceSensorState(deviceID);
     };
     CadenceSensor.prototype.decodeData = function (data) {
@@ -277,28 +277,29 @@ function updateState(sensor, state, data) {
 }
 function updateCadenceState(sensor, state, data) {
     let cadenceTime = data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 4);
-    cadenceTime |= data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 5) << 8;
-
     let cadenceCount = data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 6);
+    cadenceTime |= data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 5) << 8;
     cadenceCount |= data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 7) << 8;
-
+    state.sensor=sensor;
     if (state.oldCadenceCount != null) {
-        if (state.oldCadenceCount > cadenceTime) {
-            cadenceTime += (1024 * 64);
-        }
-        let diffCount = cadenceCount - state.oldCadenceCount;
-        let diffTime = cadenceTime - state.oldCadenceTime;
-        let rpm = 60 * diffCount / (diffTime / 1024);
-
-        if (rpm) {
-            state.CalculatedCadence = rpm;
-        }
-        else{
-            state.CalculatedCadence = 0;
-        }
-        sensor.emit('cadenceData', state);
+        var rpm=0;
+        var time=cadenceTime-state.oldCadenceTime;
+        var revs=cadenceCount-state.oldCadenceCount;
+        if(time){
+            rpm=1024*60*revs/time;
+            state.oldCadenceCount=rpm;
+            state.oldCadenceTime=cadenceTime;
+            state.CalculatedCadence=rpm;
+            if(rpm>0)
+                sensor.emit('cadenceData', state);
+            if(state.tm)
+                clearTimeout(state.tm);
+            state.tm=setTimeout(()=>{
+                    sensor.emit('cadenceData', {"CalculatedCadence":0});
+        },2000)
     }
-    state.oldCadenceCount = cadenceCount;
-    state.oldCadenceTime = cadenceTime;
+}
+state.oldCadenceCount = cadenceCount;
+state.oldCadenceTime = cadenceTime;
 }
 //# sourceMappingURL=speed-cadence-sensors.js.map
