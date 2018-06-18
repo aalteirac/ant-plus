@@ -224,7 +224,7 @@ function updateSpeedState(sensor, state, data) {
     //speed in m/sec
     var speed = (distance * 1024) / (speedEventTime - oldSpeedTime);
     //console.log(speed);
-    if (!isNaN(speed)) {
+    if (!isNaN(speed) && speed>0) {
         state.CalculatedSpeed = speed;
         sensor.emit('speedData', state);
     }
