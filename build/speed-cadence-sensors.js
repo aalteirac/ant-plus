@@ -174,7 +174,7 @@ var SpeedSensor = /** @class */ (function (_super) {
     };
     SpeedSensor.prototype.attach = function (channel, deviceID) {
         //console.log("ATTACH SENSOR",channel, 'receive', deviceID, SpeedSensor.deviceType, 0, 255, 8086);
-        _super.prototype.attach.call(this, channel, 'receive', deviceID, SpeedSensor.deviceType, 0, 255, 8102);
+        _super.prototype.attach.call(this, channel, 'receive', deviceID, SpeedSensor.deviceType, 0, 255, 8118);
         this.state = new SpeedCadenceSensorState(deviceID);
     };
     SpeedSensor.prototype.decodeData = function (data) {
@@ -209,30 +209,57 @@ exports.CadenceSensor = CadenceSensor;
 function updateSpeedState(sensor, state, data) {
     var oldSpeedTime = state.SpeedEventTime;
     var oldSpeedCount = state.CumulativeSpeedRevolutionCount;
+    //var speedEventTime = data.readUInt16LE(Messages.BUFFER_INDEX_MSG_DATA + 4);
+    //var speedRevolutionCount = data.readUInt16LE(Messages.BUFFER_INDEX_MSG_DATA + 6);
     var speedEventTime = data.readUInt16LE(Messages.BUFFER_INDEX_MSG_DATA + 4);
     var speedRevolutionCount = data.readUInt16LE(Messages.BUFFER_INDEX_MSG_DATA + 6);
     speedEventTime |= data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 5) << 8;
     speedRevolutionCount|=data.readUInt8(Messages.BUFFER_INDEX_MSG_DATA + 7) << 8;
-    //if (speedEventTime !== oldSpeedTime) {
-    state.SpeedEventTime = speedEventTime;
-    state.CumulativeSpeedRevolutionCount = speedRevolutionCount;
-    if (oldSpeedTime > speedEventTime) {
-        speedEventTime += (1024 * 64);
-    }
-    var distance = sensor.wheelCircumference * (speedRevolutionCount - oldSpeedCount);
-    state.CalculatedDistance = distance;
-    //speed in m/sec
-    var speed = (distance * 1024) / (speedEventTime - oldSpeedTime);
-    //console.log(speed);
-    if (!isNaN(speed) && speed>0) {
-        state.CalculatedSpeed = speed;
+    if (speedEventTime !== oldSpeedTime) {
+        if(state.tm)
+            clearTimeout(state.tm);
+        state.SpeedEventTime = speedEventTime;
+        state.CumulativeSpeedRevolutionCount = speedRevolutionCount;
+        if (oldSpeedTime > speedEventTime) {
+            speedEventTime += (1024 * 64);
+        }
+        var distance = sensor.wheelCircumference * (speedRevolutionCount - oldSpeedCount);
+        state.CalculatedDistance = distance;
+        //speed in m/sec
+        var speed = (distance * 1024) / (speedEventTime - oldSpeedTime);
+        //console.log(speed);
+        if (!isNaN(speed) && speed>0) {
+            state.CalculatedSpeed = speed;
+            sensor.emit('speedData', state);
+        }
+        else{
+            state.CalculatedSpeed = 0;
+            state.CalculatedDistance = 0;
+            sensor.emit('speedData', state);
+        }
+    }else{
+        state.tm=setTimeout(()=>{
+            state.CalculatedDistance = 0;
+            state.CalculatedSpeed = 0;
+            sensor.emit('speedData', state);
+        },2900)
+        state.SpeedEventTime = speedEventTime;
+        state.CumulativeSpeedRevolutionCount = speedRevolutionCount;
         sensor.emit('speedData', state);
+        //if(state.CalculatedDistance>=sensor.wheelCircumference){
+        //    state.SpeedEventTime = speedEventTime;
+        //    state.CumulativeSpeedRevolutionCount = speedRevolutionCount;
+        //    sensor.emit('speedData', state);
+        //
+        //}
+        //else {
+        //    state.SpeedEventTime = speedEventTime;
+        //    state.CumulativeSpeedRevolutionCount = speedRevolutionCount;
+        //    state.CalculatedDistance = 0;
+        //    state.CalculatedSpeed = 0;
+        //    sensor.emit('speedData', state);
+        //}
     }
-    else{
-        state.CalculatedSpeed = 0;
-        sensor.emit('speedData', state);
-    }
-    //}
 }
 function updateState(sensor, state, data) {
     //get old state for calculating cumulative values
@@ -295,11 +322,10 @@ function updateCadenceState(sensor, state, data) {
             if(state.tm)
                 clearTimeout(state.tm);
             state.tm=setTimeout(()=>{
-                    sensor.emit('cadenceData', {"CalculatedCadence":0});
-        },2000)
+                sensor.emit('cadenceData', {"CalculatedCadence":0});
+            },2900)
+        }
     }
+    state.oldCadenceCount = cadenceCount;
+    state.oldCadenceTime = cadenceTime;
 }
-state.oldCadenceCount = cadenceCount;
-state.oldCadenceTime = cadenceTime;
-}
-//# sourceMappingURL=speed-cadence-sensors.js.map
